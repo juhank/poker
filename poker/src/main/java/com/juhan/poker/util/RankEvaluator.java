@@ -1,9 +1,11 @@
 package com.juhan.poker.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import android.util.Log;
 import com.juhan.poker.model.Card;
 import com.juhan.poker.model.Card.Suits;
 import com.juhan.poker.model.Dealer;
@@ -15,6 +17,8 @@ import com.juhan.poker.model.Player;
 public class RankEvaluator {
 
     private int rank = 9;
+    private int rank2 = 0;
+    private int rank3 = 0;
     private Player player;
     private List<Card> cards;
     public static final String[] ranks = new String[]{
@@ -38,9 +42,12 @@ public class RankEvaluator {
         this.cards = cards;
         Collections.sort(cards);
         evaluate();
+        Log.d("RankEvaluator:", "rank: " + rank + "(" + ranks[rank] + "), rank2:" + rank2 + ", rank3:" + rank3);
     }
 
     private void evaluate(){
+        rank = 9;
+        Log.d("RankEvaluator:", "evaluating " + player.getName() + "(" + player.getCardsString() + ")");
         if (isRoyalFlush()) {rank = 0;return;}
         if (isStraightFlush()) {rank = 1;return;}
         if (isFourOfAKind()) {rank = 2;return;}
@@ -51,7 +58,8 @@ public class RankEvaluator {
         int num = numberOfPairs();
         if (num == 2) {rank = 7;return;}
         if (num == 1) {rank = 8;return;}
-        rank = 9;
+        rank2 = cards.get(4).getRank();
+        rank3 = cards.get(3).getRank();
     }
 
     public RankEvaluator compareRanks(RankEvaluator another){
@@ -62,15 +70,27 @@ public class RankEvaluator {
         }
     }
 
+    // simplified, when both players have the same rank & highest card, dealer wins.
     private RankEvaluator compareDraw(RankEvaluator another){
         if (rank != another.rank)
             throw new RuntimeException("This should have not happened!");
 
-        int pMax = Collections.max(cards).getRank();
-        int dMax = Collections.max(another.cards).getRank();
+        if (Arrays.asList(0,1,4,5).contains(rank)){
+            int pMax = Collections.max(cards).getRank();
+            Log.d("RankEvaluator:", "comparing player max");
+            int dMax = Collections.max(another.cards).getRank();
 
-        // simplified, when both players have the same rank & highest card, dealer wins.
-        return pMax > dMax ? this : another;
+            return pMax > dMax ? this : another;
+        } else {
+            if (rank2 != another.rank2) {
+                return rank2 > another.rank2 ? this : another;
+            }
+            if (rank3 != another.rank3) {
+                return rank3 > another.rank3 ? this : another;
+            }
+
+            return another;
+        }
     }
 
     private boolean isRoyalFlush(){
@@ -82,10 +102,31 @@ public class RankEvaluator {
         return isFlush() && isStraight();
     }
 
-    private boolean isFourOfAKind() { return isNumberOfAKind(cards, 4); }
+    private boolean isFourOfAKind() {
+        if (cards.get(0).getRank() == cards.get(3).getRank() ||
+            cards.get(1).getRank() == cards.get(4).getRank()){
+
+            rank2 = cards.get(0).getRank() == cards.get(1).getRank() ?
+                    cards.get(4).getRank() : cards.get(0).getRank();
+            return true;
+        } else return false;
+    }
 
     private boolean isFullHouse(){
-        return isNumberOfAKind(cards, 3) && numberOfPairs() == 3;
+        boolean fullHouse = false;
+        if (cards.get(0).getRank() == cards.get(2).getRank() &&
+            cards.get(3).getRank() == cards.get(4).getRank()){
+            rank2 = cards.get(0).getRank();
+            rank3 = cards.get(4).getRank();
+            fullHouse = true;
+        }
+        if (cards.get(0).getRank() == cards.get(1).getRank() &&
+            cards.get(2).getRank() == cards.get(4).getRank()) {
+            rank2 = cards.get(4).getRank();
+            rank3 = cards.get(0).getRank();
+            fullHouse = true;
+        }
+        return fullHouse;
     }
 
     private boolean isFlush(){
@@ -98,30 +139,49 @@ public class RankEvaluator {
 
     // this method is simplified. Ace - 2 - 3 - 4 - 5 doesn't count.
     private boolean isStraight(){
-        return Collections.max(cards).getRank() - Collections.min(cards).getRank() == 5;
+        return
+                cards.get(0).getRank() == cards.get(1).getRank() -1 &&
+                cards.get(0).getRank() == cards.get(2).getRank() -2 &&
+                cards.get(0).getRank() == cards.get(3).getRank() -3 &&
+                cards.get(0).getRank() == cards.get(4).getRank() -4;
     }
 
-    private boolean isThreeOfAKind() { return isNumberOfAKind(cards, 3); }
+    private boolean isThreeOfAKind() {
+        int three = isNumberOfAKind(cards, 3);
+        if (three != 0){
+            rank2 = three;
+            return true;
+        }
+        else return false;
+    }
 
     private int numberOfPairs(){
-        int pairs = 0;
+        int pairs = 0, temp = 0;
         for (int i = 0; i<4; i++){
-            if (isNumberOfAKind(cards.subList(i, i+2), 2))
+            temp = isNumberOfAKind(cards.subList(i, i+2), 2);
+            if (temp != 0) {
                 pairs++;
+                rank2 = temp;
+            }
         }
         return pairs;
     }
 
-    private boolean isNumberOfAKind(List<Card> cards, int number) {
+    private int isNumberOfAKind(List<Card> cards, int number) {
 
         for(int rank=2; rank<=14; rank++) {
-            int count = 0;
+            int count = 0, temp=0;
             for (int i = 0; i < cards.size(); i++){
-                if (cards.get(i).getRank()==rank) { count++; }
+                if (cards.get(i).getRank()==rank) {
+                    temp=cards.get(i).getRank();
+                    count++;
+                }
             }
-            if (count==number) { return true; }
+            if (count==number) {
+                return temp;
+            }
         }
-        return false;
+        return 0;
     }
 
     public int getRank(){

@@ -7,7 +7,8 @@ import com.juhan.poker.model.Player;
 public class TestRankEvaluator {
     public static void main(String[] args) {
 
-        Player player = new Player("Juku");
+
+        /*Player player = new Player("Juku");
         player.giveCard(new Card(Card.Suits.CLUBS, 7));
         player.giveCard(new Card(Card.Suits.DIAMONDS, 9));
         player.giveCard(new Card(Card.Suits.HEARTS, 10));
@@ -15,6 +16,6 @@ public class TestRankEvaluator {
         player.giveCard(new Card(Card.Suits.HEARTS, 14));
 
 
-        RankEvaluator eval = new RankEvaluator(player);
+        RankEvaluator eval = new RankEvaluator(player);*/
     }
 }

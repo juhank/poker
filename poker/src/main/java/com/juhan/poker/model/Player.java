@@ -1,5 +1,7 @@
 package com.juhan.poker.model;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -7,17 +9,19 @@ import java.util.List;
 import java.util.Observable;
 
 /**
- * Created by juhan_000 on 28.09.2014.
+ * Created by Juhan Klementi on 28.09.2014.
  */
 public class Player extends Observable {
     private String name;
     private int chips;
     private List<Card> cards;
+    private Context context;
 
-    public Player(String name){
+    public Player(String name, Context context){
         this.name = name;
         this.chips = Game.STARTING_CHIPS;
         this.cards = new ArrayList<Card>();
+        this.context = context;
     }
 
     public void giveCard(Card card) {
@@ -32,6 +36,8 @@ public class Player extends Observable {
     }
 
     public void addChips(int chips) {
+        if (this.chips + chips < 0)
+            throw new RuntimeException("MATHAFAKKAAA YOU CHEATER!");
         setChanged();
         this.chips += chips;
         notifyObservers();
@@ -58,5 +64,19 @@ public class Player extends Observable {
             stringBuilder.append(", ");
         }
         return stringBuilder.substring(0, stringBuilder.length()-2);
+    }
+
+    public List<Drawable> getDrawables(){
+
+        List<Drawable> cardPics = new ArrayList<Drawable>();
+
+        for (Card card : getCards()){
+            cardPics.add(context.getResources().getDrawable(context
+                    .getResources()
+                    .getIdentifier(card.getSuit().name().substring(0, 1).toLowerCase() + card.getRank(),
+                            "drawable", context.getPackageName())));
+        }
+        return cardPics;
+
     }
 }

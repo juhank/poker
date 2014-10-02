@@ -25,13 +25,14 @@
             android:layout_height="wrap_content"
             android:onClick="playerAction"/>
 
-    <TextView
+    <com.juhan.poker.view.CardView
             android:id="@+id/dealerView"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
     <TextView
             android:id="@+id/dealerChips"
+            android:layout_below="@id/dealerView"
             android:layout_width="20dp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"/>
@@ -42,18 +43,17 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"/>
 
-
-    <TextView
+    <com.juhan.poker.view.CardView
             android:id="@+id/playerView"
             android:layout_above="@id/betButton"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
     <TextView
             android:id="@+id/playerChips"
             android:layout_width="20dp"
             android:layout_height="wrap_content"
-            android:layout_above="@id/betButton"
+            android:layout_above="@id/playerView"
             android:layout_alignParentRight="true"/>
 
 

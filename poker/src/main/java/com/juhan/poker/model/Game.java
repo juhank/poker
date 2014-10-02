@@ -14,13 +14,12 @@ public class Game {
     private final Player player;
     private final Dealer dealer;
 
-    public static final int STARTING_CHIPS = 20;
+    public static final int STARTING_CHIPS = 4;
     public static final int GAME_STARTING = 0;
     public static final int WAITING_DEALER = 1;
     public static final int WAITING_PLAYER = 2;
     public static final int GAME_OVER = 3;
     public static final int EVALUATION = 4;
-    public static final int PAUSE = 5;
 
     private int state;
     private Thread game;
@@ -70,12 +69,11 @@ public class Game {
 
         GameThread(Game game) {
             this.game = game;
-
         }
 
         @Override
         public void run() {
-            while (game.state != PAUSE) {
+            while (game.state != GAME_OVER) {
                 synchronized (game) {
                     try {
                         if (game.state == GAME_STARTING) {
@@ -110,8 +108,12 @@ public class Game {
                                     winner.getPlayer().getName() +
                                     " wins pot of " + game.getPot() + " with " +
                                     RankEvaluator.ranks[winner.getRank()]);
-                            message.setData(bundle);
 
+                            if (dealer.getChips() == 0 || player.getChips() == 0) {
+                                // TODO: distinguish by something better
+                                bundle.putString("winner", winner.getPlayer().getName());
+                            }
+                            message.setData(bundle);
                             game.setState(EVALUATION, message);
                             game.wait();
                         }

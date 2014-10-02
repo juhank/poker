@@ -3,6 +3,8 @@ package com.juhan.poker.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import android.content.Context;
 import android.util.Log;
 import com.juhan.poker.model.Card.Suits;
 
@@ -12,8 +14,8 @@ import com.juhan.poker.model.Card.Suits;
 public class Dealer extends Player {
     private List<Card> cards = new ArrayList<Card>();
 
-    public Dealer (String name) {
-        super(name);
+    public Dealer (String name, Context context) {
+        super(name, context);
     }
 
     public void shuffle(){

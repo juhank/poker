@@ -8,11 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.*;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.juhan.poker.model.Dealer;
 import com.juhan.poker.model.Game;
 import com.juhan.poker.model.Player;
 import com.juhan.poker.util.RankEvaluator;
+import com.juhan.poker.view.CardView;
 import org.w3c.dom.Text;
 
 import java.util.Observable;
@@ -37,43 +40,43 @@ public class MainActivity extends ActionBarActivity implements Observer {
                     .commit();
         }
 
-        dealer = new Dealer("Peedu");
+        dealer = new Dealer("Peedu", this);
         dealer.addObserver(this);
-        player = new Player("Juhan");
+        player = new Player("Juhan", this);
         dealer.addObserver(this);
 
         mHandler = new Handler(Looper.getMainLooper()) {
 
             @Override
             public void handleMessage(Message msg) {
-                ((TextView)findViewById(R.id.pot)).setText("POT: " + game.getPot());
-                if (msg.what == game.GAME_STARTING) {
-                    Log.d("UI", "Game starting");
-                }
+
                 if (msg.what == game.WAITING_PLAYER) {
                     Log.d("UI", "Waiting player input");
-                    TextView tv = (TextView)findViewById(R.id.playerView);
-                    tv.setText(player.getCardsString());
+                    CardView view = (CardView)findViewById(R.id.playerView);
+                    view.setImages(player.getDrawables());
                     togglePlayerButtons(true);
                 }
-                if (msg.what == game.GAME_OVER) {
-                    Log.d("UI:", "Game Over");
-                }
                 if (msg.what == game.EVALUATION) {
-
                     Bundle bundle = msg.getData();
                     int dealerRank = bundle.getInt("dealerRank");
                     Log.d("UI", "Dealer has:" + RankEvaluator.ranks[dealerRank]);
                     int playerRank = bundle.getInt("playerRank");
                     Log.d("UI", "Player has:" + RankEvaluator.ranks[playerRank]);
                     String winText = bundle.getString("winText");
-                    ((TextView)findViewById(R.id.pot)).setText(winText);
 
-                    TextView tv = (TextView) findViewById(R.id.dealerView);
-                    tv.setText(dealer.getCardsString());
+                    ((TextView)findViewById(R.id.pot)).setText("POT: " + game.getPot());
+                    CardView view = (CardView)findViewById(R.id.dealerView);
+                    view.setImages(dealer.getDrawables());
 
-                    findViewById(R.id.newHandButton).setVisibility(View.VISIBLE);
-
+                    if (!bundle.containsKey("winner")) {
+                        ((TextView)findViewById(R.id.pot)).setText(winText);
+                        findViewById(R.id.newHandButton).setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        ((TextView)findViewById(R.id.pot)).setText("GAME OVER: " + bundle.getString("winner") + " wins");
+                        game.setState(Game.GAME_OVER);
+                        notifyGameThread();
+                    }
                 }
             }
         };
@@ -85,25 +88,28 @@ public class MainActivity extends ActionBarActivity implements Observer {
     @Override
     public void update(Observable observable, Object data) {
 
-        TextView dealerChips = (TextView) findViewById(R.id.dealerChips);
-        TextView playerChips = (TextView) findViewById(R.id.playerChips);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
-        if (dealerChips != null)
-            dealerChips.setText(String.valueOf(dealer.getChips()));
-        if (playerChips != null)
-            playerChips.setText(String.valueOf(player.getChips()));
+                TextView dealerChips = (TextView) findViewById(R.id.dealerChips);
+                TextView playerChips = (TextView) findViewById(R.id.playerChips);
 
+                if (dealerChips != null)
+                    dealerChips.setText(String.valueOf(dealer.getChips()));
+                if (playerChips != null)
+                    playerChips.setText(String.valueOf(player.getChips()));
+
+            }
+        });
     }
 
     private void togglePlayerButtons(boolean visible) {
         findViewById(R.id.checkButton).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        findViewById(R.id.betButton).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.betButton).setVisibility(visible && player.getChips() > 0 ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void playerAction(View view) {
-        if (view.getId() == R.id.checkButton) {
-
-        }
         if (view.getId() == R.id.betButton) {
             player.addChips(-1);
             game.setPot(game.getPot() + 1);
@@ -115,8 +121,8 @@ public class MainActivity extends ActionBarActivity implements Observer {
 
     public void newHand(View view) {
         view.setVisibility(View.INVISIBLE);
-        ((TextView) findViewById(R.id.playerView)).setText("");
-        ((TextView) findViewById(R.id.dealerView)).setText("");
+        ((CardView) findViewById(R.id.playerView)).resetImages();
+        ((CardView) findViewById(R.id.dealerView)).resetImages();
         game.setState(Game.GAME_STARTING);
         notifyGameThread();
     }
