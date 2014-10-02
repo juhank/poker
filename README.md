@@ -1,4 +1,6 @@
-README
+INTRODUCTION 
+============
+This is a simple 5-card draw poker game written for Android.
 
 INSTALLATION
 ============
