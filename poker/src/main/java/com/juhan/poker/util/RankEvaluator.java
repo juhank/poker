@@ -1,19 +1,20 @@
 package com.juhan.poker.util;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import android.util.Log;
 import com.juhan.poker.model.Card;
 import com.juhan.poker.model.Card.Suits;
-import com.juhan.poker.model.Dealer;
 import com.juhan.poker.model.Player;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Juhan Klementi on 29.09.2014.
  */
+
+//TODO: algorithm testing & improvement
 public class RankEvaluator {
 
     private int rank = 9;
@@ -39,7 +40,6 @@ public class RankEvaluator {
         cards = player.getCards();
         if (cards == null || cards.size() != 5)
             throw new RuntimeException("Not supported");
-        this.cards = cards;
         Collections.sort(cards);
         evaluate();
         Log.d("RankEvaluator:", "rank: " + rank + "(" + ranks[rank] + "), rank2:" + rank2 + ", rank3:" + rank3);
@@ -65,9 +65,7 @@ public class RankEvaluator {
     public RankEvaluator compareRanks(RankEvaluator another){
         if (this.rank < another.rank) return this;
         if (this.rank > another.rank) return another;
-        else {
-            return compareDraw(another);
-        }
+        return compareDraw(another);
     }
 
     // simplified, when both players have the same rank & highest card, dealer wins.
@@ -76,20 +74,27 @@ public class RankEvaluator {
             throw new RuntimeException("This should have not happened!");
 
         if (Arrays.asList(0,1,4,5).contains(rank)){
-            int pMax = Collections.max(cards).getRank();
-            Log.d("RankEvaluator:", "comparing player max");
-            int dMax = Collections.max(another.cards).getRank();
-
-            return pMax > dMax ? this : another;
+            return
+                    Collections.max(cards).getRank() >
+                    Collections.max(another.cards).getRank() ? this : another;
         } else {
-            if (rank2 != another.rank2) {
+            if (rank2 != another.rank2)
                 return rank2 > another.rank2 ? this : another;
-            }
-            if (rank3 != another.rank3) {
+            if (rank3 != another.rank3)
                 return rank3 > another.rank3 ? this : another;
-            }
 
-            return another;
+            ArrayList<Card> temp = new ArrayList<>(cards);
+            ArrayList<Card> anotherTemp = new ArrayList<>(another.cards);
+            temp.removeAll(Arrays.asList(rank2, rank3));
+            anotherTemp.removeAll(Arrays.asList(rank2, rank3));
+
+            for (int i = temp.size()-1; i>=0; i--){
+                if (temp.get(i).getRank() != anotherTemp.get(i).getRank())
+                    return temp.get(i).getRank() > anotherTemp.get(i).getRank() ? this : another;
+            }
+            // card ranks are identical
+            return null;
+
         }
     }
 
@@ -137,13 +142,15 @@ public class RankEvaluator {
         return true;
     }
 
-    // this method is simplified. Ace - 2 - 3 - 4 - 5 doesn't count.
     private boolean isStraight(){
         return
-                cards.get(0).getRank() == cards.get(1).getRank() -1 &&
+                (cards.get(0).getRank() == cards.get(1).getRank() -1 &&
                 cards.get(0).getRank() == cards.get(2).getRank() -2 &&
                 cards.get(0).getRank() == cards.get(3).getRank() -3 &&
-                cards.get(0).getRank() == cards.get(4).getRank() -4;
+                cards.get(0).getRank() == cards.get(4).getRank() -4) ||
+                (cards.get(0).getRank() == 2 && cards.get(1).getRank() == 3 &&
+                cards.get(2).getRank() == 4 && cards.get(3).getRank() == 5 &&
+                cards.get(4).getRank() == 14);
     }
 
     private boolean isThreeOfAKind() {

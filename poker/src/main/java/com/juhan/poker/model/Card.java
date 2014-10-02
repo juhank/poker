@@ -1,24 +1,12 @@
 package com.juhan.poker.model;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import com.juhan.poker.R;
-
-import java.util.List;
-
 /**
- * Created by juhan_000 on 28.09.2014.
+ * Created by Juhan Klementi on 28.09.2014.
  */
 public class Card implements Comparable {
 
-    private Context context;
+    public enum Suits {SPADES,HEARTS,DIAMONDS,CLUBS;}
 
-    public enum Suits {
-        SPADES,
-        HEARTS,
-        DIAMONDS,
-        CLUBS;
-    }
     public static String [] faces = new String[]{"2", "3", "4", "5", "6",
             "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
     public static int [] ranks = new int[]{2,3,4,5,6,7,8,9,10,11,12,13,14};

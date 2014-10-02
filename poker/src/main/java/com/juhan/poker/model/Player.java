@@ -13,7 +13,7 @@ import java.util.Observable;
  */
 public class Player extends Observable {
     private String name;
-    private int chips;
+    protected int chips;
     private List<Card> cards;
     private Context context;
 
@@ -37,7 +37,7 @@ public class Player extends Observable {
 
     public void addChips(int chips) {
         if (this.chips + chips < 0)
-            throw new RuntimeException("MATHAFAKKAAA YOU CHEATER!");
+            throw new RuntimeException("ERROR: Bet was larger than Chip amount!");
         setChanged();
         this.chips += chips;
         notifyObservers();

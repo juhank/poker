@@ -1,21 +1,23 @@
 package com.juhan.poker.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import android.content.Context;
 import android.util.Log;
 import com.juhan.poker.model.Card.Suits;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Juhan Klementi on 28.09.2014.
  */
 public class Dealer extends Player {
+
     private List<Card> cards = new ArrayList<Card>();
 
     public Dealer (String name, Context context) {
         super(name, context);
+        chips = 2;
     }
 
     public void shuffle(){
@@ -30,6 +32,12 @@ public class Dealer extends Player {
             player.giveCard(cards.get(i));
         }
         cards = cards.subList(5, cards.size());
+    }
+
+    public void dealDummyCards(Player player){
+        for (int i = 0; i<5; i++) {
+            player.giveCard(cards.get(i));
+        }
     }
 
     private List<Card> getCardDeck(){

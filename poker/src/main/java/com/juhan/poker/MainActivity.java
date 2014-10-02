@@ -10,13 +10,11 @@ import android.util.Log;
 import android.view.*;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.juhan.poker.model.Dealer;
 import com.juhan.poker.model.Game;
 import com.juhan.poker.model.Player;
 import com.juhan.poker.util.RankEvaluator;
 import com.juhan.poker.view.CardView;
-import org.w3c.dom.Text;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -29,14 +27,13 @@ public class MainActivity extends ActionBarActivity implements Observer {
     private Dealer dealer;
     private Player player;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new GameFragment())
                     .commit();
         }
 
@@ -51,6 +48,7 @@ public class MainActivity extends ActionBarActivity implements Observer {
             public void handleMessage(Message msg) {
 
                 if (msg.what == game.WAITING_PLAYER) {
+                    ((TextView)findViewById(R.id.pot)).setText("POT: " + game.getPot());
                     Log.d("UI", "Waiting player input");
                     CardView view = (CardView)findViewById(R.id.playerView);
                     view.setImages(player.getDrawables());
@@ -64,7 +62,6 @@ public class MainActivity extends ActionBarActivity implements Observer {
                     Log.d("UI", "Player has:" + RankEvaluator.ranks[playerRank]);
                     String winText = bundle.getString("winText");
 
-                    ((TextView)findViewById(R.id.pot)).setText("POT: " + game.getPot());
                     CardView view = (CardView)findViewById(R.id.dealerView);
                     view.setImages(dealer.getDrawables());
 
@@ -80,10 +77,10 @@ public class MainActivity extends ActionBarActivity implements Observer {
                 }
             }
         };
+
         game = new Game(player, dealer, mHandler);
         game.start();
     }
-
 
     @Override
     public void update(Observable observable, Object data) {
@@ -107,22 +104,34 @@ public class MainActivity extends ActionBarActivity implements Observer {
     private void togglePlayerButtons(boolean visible) {
         findViewById(R.id.checkButton).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         findViewById(R.id.betButton).setVisibility(visible && player.getChips() > 0 ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.betAmountButton).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void playerAction(View view) {
         if (view.getId() == R.id.betButton) {
-            player.addChips(-1);
-            game.setPot(game.getPot() + 1);
+            int b = Integer.valueOf(((Button)findViewById(R.id.betAmountButton)).getText().toString());
+            player.addChips(-1 * b);
+            game.setPot(game.getPot() + b);
         }
         togglePlayerButtons(false);
         game.setState(Game.WAITING_DEALER);
         notifyGameThread();
     }
 
+    public void changeBet(View view) {
+        if (view.getId() == R.id.betAmountButton) {
+            int betAmount = Integer.valueOf (((Button)view).getText().toString());
+            if (player.getChips() >= betAmount + 2 && dealer.getChips() >= betAmount + 2){
+                ((Button) view).setText(String.valueOf(betAmount + 2));
+            } else ((Button) view).setText(String.valueOf(2));
+        }
+    }
+
     public void newHand(View view) {
         view.setVisibility(View.INVISIBLE);
         ((CardView) findViewById(R.id.playerView)).resetImages();
         ((CardView) findViewById(R.id.dealerView)).resetImages();
+        ((Button) findViewById(R.id.betAmountButton)).setText(String.valueOf(2));
         game.setState(Game.GAME_STARTING);
         notifyGameThread();
     }
@@ -153,22 +162,18 @@ public class MainActivity extends ActionBarActivity implements Observer {
     }
 
     /**
-     * A placeholder fragment containing a simple view.
+     * A fragment containing the poker game.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class GameFragment extends Fragment {
 
-
-        public PlaceholderFragment() {
-        }
+        public GameFragment() {}
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             ((TextView)rootView.findViewById(R.id.dealerChips)).setText(String.valueOf(Game.STARTING_CHIPS));
             ((TextView)rootView.findViewById(R.id.playerChips)).setText(String.valueOf(Game.STARTING_CHIPS));
             return rootView;
         }
-
     }
 }
