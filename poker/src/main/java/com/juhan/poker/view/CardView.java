@@ -12,6 +12,8 @@ import com.juhan.poker.model.Card;
 import java.util.List;
 
 /**
+ * A View consisting of 5 cards side-by-side contained in ImageViews.
+ *
  * Created by Juhan Klementi on 1.10.2014.
  */
 public class CardView extends LinearLayout {
@@ -20,6 +22,7 @@ public class CardView extends LinearLayout {
         LayoutInflater.from(context).inflate(R.layout.view_cardview, this, true);
     }
 
+    // sets the ImageViews' drawables
     public void setImages(List<Drawable> cards) {
         LinearLayout view = (LinearLayout)findViewById(R.id.linearLayout_cards);
         for(int i = 0 ; i < view.getChildCount(); i++){
@@ -28,6 +31,7 @@ public class CardView extends LinearLayout {
         }
     }
 
+    // resets the images before new round
     public void resetImages(){
         LinearLayout view = (LinearLayout)findViewById(R.id.linearLayout_cards);
         for(int i = 0 ; i < view.getChildCount(); i++){

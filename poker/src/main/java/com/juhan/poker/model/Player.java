@@ -13,7 +13,7 @@ import java.util.Observable;
  */
 public class Player extends Observable {
     private String name;
-    protected int chips;
+    private int chips;
     private List<Card> cards;
     private Context context;
 

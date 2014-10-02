@@ -7,6 +7,9 @@ import com.juhan.poker.model.Game;
 import com.juhan.poker.model.Player;
 import static com.juhan.poker.model.Game.*;
 
+/**
+ * Created by Juhan Klementi on 28.09.2014.
+ */
 public class GameThread implements Runnable {
 
     private Game game;

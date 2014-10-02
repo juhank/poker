@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * This class can be used to evaluate the strength of a 5-card draw poker hand.
+ *
  * Created by Juhan Klementi on 29.09.2014.
  */
 
@@ -45,6 +47,11 @@ public class RankEvaluator {
         Log.d("RankEvaluator:", "rank: " + rank + "(" + ranks[rank] + "), rank2:" + rank2 + ", rank3:" + rank3);
     }
 
+    /**
+     * Evaluates the hand by checking for different poker combinations.
+     *
+     * @return int of the hand rank from 0 - 9, 0 being the best and 9 being the worst.
+     */
     private void evaluate(){
         rank = 9;
         Log.d("RankEvaluator:", "evaluating " + player.getName() + "(" + player.getCardsString() + ")");
@@ -62,13 +69,23 @@ public class RankEvaluator {
         rank3 = cards.get(3).getRank();
     }
 
+    /**
+     * Compares hand strength to another hand. If ranks are equal, further comparing needs to be done.
+     * @param another
+     * @return RankEvaluator of winning hand
+     */
     public RankEvaluator compareRanks(RankEvaluator another){
         if (this.rank < another.rank) return this;
         if (this.rank > another.rank) return another;
         return compareDraw(another);
     }
 
-    // simplified, when both players have the same rank & highest card, dealer wins.
+    /**
+     * Compares to hands when ranks are equal. For example, high cards are checked for a kicker
+     * and straights are checked, which is the highest.
+     * @param another Rank to be compared against.
+     * @return RankEvaluator of the winning hand, null if hands are equal (no winner)
+     */
     private RankEvaluator compareDraw(RankEvaluator another){
         if (rank != another.rank)
             throw new RuntimeException("This should have not happened!");

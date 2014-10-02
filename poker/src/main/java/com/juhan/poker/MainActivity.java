@@ -20,6 +20,11 @@ import java.util.Observable;
 import java.util.Observer;
 
 
+/**
+ * Main entry point for the 5-card draw poker application
+ *
+ * Created by Juhan Klementi on 28.09.2014.
+ */
 public class MainActivity extends ActionBarActivity implements Observer {
 
     private Handler mHandler;
@@ -27,6 +32,7 @@ public class MainActivity extends ActionBarActivity implements Observer {
     private Dealer dealer;
     private Player player;
 
+    //TODO: Fragments for different screen sizes
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +50,7 @@ public class MainActivity extends ActionBarActivity implements Observer {
 
         mHandler = new Handler(Looper.getMainLooper()) {
 
+            // handles messages from background tasks and updates the UI.
             @Override
             public void handleMessage(Message msg) {
 
@@ -82,6 +89,7 @@ public class MainActivity extends ActionBarActivity implements Observer {
         game.start();
     }
 
+    // data changes are observed to display chip count
     @Override
     public void update(Observable observable, Object data) {
 
@@ -101,12 +109,14 @@ public class MainActivity extends ActionBarActivity implements Observer {
         });
     }
 
+    // hides buttons when not needed
     private void togglePlayerButtons(boolean visible) {
         findViewById(R.id.checkButton).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         findViewById(R.id.betButton).setVisibility(visible && player.getChips() > 0 ? View.VISIBLE : View.INVISIBLE);
         findViewById(R.id.betAmountButton).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
+    // player made a bet choice
     public void playerAction(View view) {
         if (view.getId() == R.id.betButton) {
             int b = Integer.valueOf(((Button)findViewById(R.id.betAmountButton)).getText().toString());
@@ -118,6 +128,8 @@ public class MainActivity extends ActionBarActivity implements Observer {
         notifyGameThread();
     }
 
+    // TODO: if dealer has only 1 chip left, the bet amount button should show 1
+    // increase the bet value by increment of 2
     public void changeBet(View view) {
         if (view.getId() == R.id.betAmountButton) {
             int betAmount = Integer.valueOf (((Button)view).getText().toString());
@@ -127,6 +139,7 @@ public class MainActivity extends ActionBarActivity implements Observer {
         }
     }
 
+    // starts a new hand
     public void newHand(View view) {
         view.setVisibility(View.INVISIBLE);
         ((CardView) findViewById(R.id.playerView)).resetImages();
@@ -136,6 +149,7 @@ public class MainActivity extends ActionBarActivity implements Observer {
         notifyGameThread();
     }
 
+    // notifies the GameThread after game state has changed
     private void notifyGameThread() {
         synchronized (game) {
             game.notify();

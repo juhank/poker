@@ -17,7 +17,6 @@ public class Dealer extends Player {
 
     public Dealer (String name, Context context) {
         super(name, context);
-        chips = 2;
     }
 
     public void shuffle(){
