@@ -5,7 +5,7 @@ This is a simple 5-card draw poker game written for Android.
 INSTALLATION
 ============
 
-Open qrcode picture from github page and scan the qr-code with an Android phone. You must have set the option "Unknown sources" under Application Settings. 
+Open https://github.com/juhank/poker/blob/master/qrcode.png and scan the qr-code with an Android phone. You must have set the option "Unknown sources" under Application Settings. 
 
 HOW TO PLAY
 ============
